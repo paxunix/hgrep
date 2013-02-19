@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+# Peel file(like) arguments off the end
+
+my @files;
+while (defined($ARGV[-1]) && -e $ARGV[-1])
+{
+    push(@files, pop(@ARGV));
+}
+
+# Reading from stdin is handled specially.
+if (! -t STDIN)
+{
+    open(my $grep, "|-", "grep", @ARGV) or
+        die("Failed opening grep pipe: $!");
+
+    while (<STDIN>)
+    {
+        print("\n$_") if ($. == 1);     # always output first line
+        print($grep $_);        # send the rest to grep
+    }
+
+    close($grep);
+    exit($?);
+}
+
+my $includeFilenames = (@files > 1 || grep { $_ eq "-H" } @ARGV);
+
+for my $file (@files)
+{
+    open(my $fh, $file) or
+        die("Failed to open $file for read: $!");
+
+    my $line = <$fh>;
+    close($fh);
+    if (defined($line))
+    {
+        print(($includeFilenames ? "$file:" : ()), $line);
+
+        system("grep", @ARGV, ($includeFilenames ? "-H" : ()), $file);
+        exit($?) if ($?);
+    }
+}
