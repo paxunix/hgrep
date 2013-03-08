@@ -7,6 +7,12 @@
 
 use strict;
 
+
+# If writing to stdout and the user has grep colouring set up, ensure it's
+# on, since our invocation of grep will think it's not attached to an output
+# terminal and therefore not output colour.
+my $wantsColour = $ENV{GREP_COLOR} ne "" && -t STDOUT;
+
 # Peel file(like) arguments off the end since we have to read the header
 # line from and pass them individually to grep.
 
@@ -46,8 +52,9 @@ for my $file (@files)
     if (defined($header))
     {
         open(my $grep, "-|",
-            "grep", ($includeFilenames ? "-H" : ()), @ARGV, $file) or
-                die("Failed to open grep pipe for read: $!");
+            "grep", ($wantsColour ? "--color=always" : ()),
+                ($includeFilenames ? "-H" : ()), @ARGV, $file) or
+            die("Failed to open grep pipe for read: $!");
 
         my $showedHeader = 0;
         while (<$grep>)
