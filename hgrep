@@ -27,6 +27,7 @@ if (! -t STDIN)
 }
 
 my $includeFilenames = (@files > 1 || grep { $_ eq "-H" } @ARGV);
+my $errors = 0;
 
 for my $file (@files)
 {
@@ -39,7 +40,10 @@ for my $file (@files)
     {
         print(($includeFilenames ? "$file:" : ()), $line);
 
-        system("grep", @ARGV, ($includeFilenames ? "-H" : ()), $file);
-        exit($?) if ($?);
+        $errors |= close($grep);
     }
 }
+
+exit($errors);
+
+# XXX:  really should have some kind of tests for this
