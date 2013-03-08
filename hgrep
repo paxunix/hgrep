@@ -1,8 +1,14 @@
 #!/usr/bin/perl -w
 
+# Run grep on each input, but always output the header (i.e. first) line of
+# each input.
+#
+# Works as much like grep as possible.
+
 use strict;
 
-# Peel file(like) arguments off the end
+# Peel file(like) arguments off the end since we have to read the header
+# line from and pass them individually to grep.
 
 my @files;
 while (defined($ARGV[-1]) && -e $ARGV[-1])
@@ -10,7 +16,8 @@ while (defined($ARGV[-1]) && -e $ARGV[-1])
     push(@files, pop(@ARGV));
 }
 
-# Reading from stdin is handled specially.
+# Reading from stdin is handled specially because there is never a leading
+# filename.
 if (! -t STDIN)
 {
     open(my $grep, "|-", "grep", @ARGV) or
@@ -34,11 +41,27 @@ for my $file (@files)
     open(my $fh, $file) or
         die("Failed to open $file for read: $!");
 
-    my $line = <$fh>;
+    my $header = <$fh>;
     close($fh);
-    if (defined($line))
+    if (defined($header))
     {
-        print(($includeFilenames ? "$file:" : ()), $line);
+        open(my $grep, "-|",
+            "grep", ($includeFilenames ? "-H" : ()), @ARGV, $file) or
+                die("Failed to open grep pipe for read: $!");
+
+        my $showedHeader = 0;
+        while (<$grep>)
+        {
+            # As soon as we've seen one matched line from grep, output the
+            # header.
+            if (!$showedHeader)
+            {
+                print(($includeFilenames ? "$file:" : ()), $header);
+                $showedHeader = 1;
+            }
+
+            print;
+        }
 
         $errors |= close($grep);
     }
