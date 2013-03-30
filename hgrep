@@ -1,9 +1,30 @@
 #!/usr/bin/perl -w
 
-# Run grep on each input, but always output the header (i.e. first) line of
-# each input.
-#
-# Works as much like grep as possible.
+
+=head1 NAME
+
+hgrep - output header + matches
+
+=head1 SYNOPSIS
+
+hgrep [grep options]
+
+=head1 DESCRIPTION
+
+Tries to work as much like grep as possible.
+
+Prior to any matches, always output the first line of each input.
+Handles stdin as well a file inputs.
+
+=head1 EXAMPLES
+
+ps -efl | hgrep someuser
+
+Outputs the header from ps (no one remembers the order of the fields) and
+any lines containing /someuser/.
+
+=cut
+
 
 use strict;
 
