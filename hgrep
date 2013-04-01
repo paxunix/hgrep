@@ -52,7 +52,7 @@ if (! -t STDIN)
 
     while (<STDIN>)
     {
-        print("\n$_") if ($. == 1);     # always output first line
+        print($_) if ($. == 1);     # always output first line
         print($grep $_);        # send the rest to grep
     }
 
