@@ -34,15 +34,6 @@ use strict;
 # terminal and therefore not output colour.
 my $wantsColour = $ENV{GREP_COLOR} ne "" && -t STDOUT;
 
-# Peel file(like) arguments off the end since we have to read the header
-# line from and pass them individually to grep.
-
-my @files;
-while (defined($ARGV[-1]) && -e $ARGV[-1])
-{
-    push(@files, pop(@ARGV));
-}
-
 # Reading from stdin is handled specially because there is never a leading
 # filename.
 if (! -t STDIN)
@@ -58,6 +49,15 @@ if (! -t STDIN)
 
     close($grep);
     exit($?);
+}
+
+# Peel file(like) arguments off the end since we have to read the header
+# line from and pass them individually to grep.
+
+my @files;
+while (defined($ARGV[-1]) && -e $ARGV[-1])
+{
+    push(@files, pop(@ARGV));
 }
 
 my $includeFilenames = (@files > 1 || grep { $_ eq "-H" } @ARGV);
