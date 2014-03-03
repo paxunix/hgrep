@@ -43,8 +43,9 @@ if (! -t STDIN)
 
     while (<STDIN>)
     {
-        print($_) if ($. == 1);     # always output first line
-        print($grep $_);        # send the rest to grep
+        # Always output the first line (without grepping), and send the rest
+        # to grep.
+        print({$. == 1 ? *STDOUT : $grep} $_);
     }
 
     close($grep);
