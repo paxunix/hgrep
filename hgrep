@@ -38,6 +38,11 @@ my $wantsColour = $ENV{GREP_COLOR} ne "" && -t STDOUT;
 # filename.
 if (! -t STDIN)
 {
+    # Enable autoflush on stdout.  This ensures the header line shows up
+    # before the first line of grep output.
+    select(STDOUT);
+    $| = 1;
+
     open(my $grep, "|-", "grep", @ARGV) or
         die("Failed opening grep pipe: $!");
 
